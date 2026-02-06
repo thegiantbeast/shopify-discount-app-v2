@@ -113,6 +113,38 @@ docs/                 — Specification and documentation
 - Coupon apply uses 3-fallback: fetch → iframe → navigation
 - Support 7 themes: Dawn, Symmetry, Vision, Wonder, Spotlight, Horizon, Savor
 
+## Agent Delegation Strategy
+
+Use a three-tier model delegation pattern to optimize cost and speed:
+
+- **Opus** — orchestrator. Reads specs, plans work, breaks tasks into focused sub-tasks, reviews output, course-corrects. Use for architectural decisions, ambiguous requirements, and quality review.
+- **Sonnet** — implementation workhorse. Receives detailed, unambiguous instructions from Opus and executes them. Use for file creation, route implementation, utility modules, and any well-defined coding task.
+- **Haiku** — lightweight tasks. Use for file searches, simple lookups, quick code reads, and trivial edits where full Sonnet capability isn't needed.
+
+### When to use each model
+
+| Task | Model | Why |
+|------|-------|-----|
+| Read specs, plan architecture | Opus | Needs full context understanding |
+| Create Prisma schema from spec | Sonnet | Well-defined, detailed instructions |
+| Implement a Remix route | Sonnet | Clear deliverable with known patterns |
+| Search for a file or grep a pattern | Haiku | Simple lookup, no reasoning needed |
+| Review Sonnet's output for spec compliance | Opus | Needs judgment and spec knowledge |
+| Write theme extension JS (edge cases) | Sonnet + Opus review | Complex but implementable with good instructions |
+| Fix a typo or rename | Haiku | Trivial change |
+
+### How it works
+
+When given an agent prompt (from `docs/agent-prompts/`), the orchestrator (Opus) should:
+1. Read the relevant spec files itself (Opus)
+2. Break the work into focused, independent sub-tasks
+3. Spawn Sonnet sub-agents with detailed instructions for each sub-task
+4. Review the output for correctness and spec compliance (Opus)
+5. Spawn Haiku sub-agents for any simple follow-up (searches, trivial fixes)
+6. Spawn Sonnet fix-up agents if review finds issues
+
+Each sub-agent starts with a fresh context — it doesn't see the conversation history. The quality of the prompt given to it is everything. Include: exact file paths, exact field names, exact patterns to follow, and what NOT to do.
+
 ## Things NOT to Build
 
 - No Redis (SQLite is sufficient at this scale)
