@@ -30,13 +30,13 @@ export async function handlePasswordProtection(page, password) {
 
 /**
  * Waits for the discount UI namespace to be initialized.
- * v2 uses window["display-discounts-pro"].ui instead of window.DiscountUI.
+ * v2 uses window["discounts-display-pro"].ui instead of window.DiscountUI.
  * @param {import('@playwright/test').Page} page
  * @param {number} [timeout=15000]
  */
 export async function waitForDiscountUI(page, timeout = 15000) {
   await page.waitForFunction(
-    () => window["display-discounts-pro"]?.ui !== undefined,
+    () => window["discounts-display-pro"]?.ui !== undefined,
     { timeout },
   );
 }
@@ -120,7 +120,7 @@ export async function resolvePriceLocator(page) {
     .first();
 
   const customSelector = await page.evaluate(() => {
-    const ns = window["display-discounts-pro"];
+    const ns = window["discounts-display-pro"];
     const raw = ns?._formPriceSelector;
     if (typeof raw === "string" && raw.trim().length > 0) return raw.trim();
     return null;

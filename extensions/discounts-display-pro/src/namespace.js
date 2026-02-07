@@ -1,6 +1,6 @@
 /**
  * App namespace reference.
- * All shared state lives under window["display-discounts-pro"].
+ * All shared state lives under window["discounts-display-pro"].
  * This key is not auto-discoverable in browser DevTools autocomplete.
  */
-export default window["display-discounts-pro"];
+export default window["discounts-display-pro"];

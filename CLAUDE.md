@@ -76,11 +76,11 @@ docs/                 — Specification and documentation
 ## Coding Conventions
 
 - **Server logging:** Use `pino` via the wrapper in `logger.server.js`. Signature: `logger.info("message", { data })` (message first, data second). Never `console.log`
-- **Client logging:** Use `window["display-discounts-pro"].logger` for client-side logging in the theme extension (from `logger.js`)
+- **Client logging:** Use `window["discounts-display-pro"].logger` for client-side logging in the theme extension (from `logger.js`)
 - **Error handling:** Webhook handlers MUST return proper HTTP error codes on failure (never 200). Shopify retries on 4xx/5xx — returning 200 on error causes silent data loss.
 - **Imports:** Use `.server.js` suffix for server-only modules (Remix convention)
 - **CSS classes:** Theme extension uses `.ddp-` prefix (e.g., `.ddp-coupon-block`, `.ddp-discount-badge`)
-- **Window globals:** All storefront globals are namespaced under `window["display-discounts-pro"]` (bracket notation, not discoverable via autocomplete). JS source files import the namespace via `import _ns from './namespace.js'` and access properties as `_ns.settings`, `_ns.logger`, etc. Never use bare `window.*` for app-specific data.
+- **Window globals:** All storefront globals are namespaced under `window["discounts-display-pro"]` (bracket notation, not discoverable via autocomplete). JS source files import the namespace via `import _ns from './namespace.js'` and access properties as `_ns.settings`, `_ns.logger`, etc. Never use bare `window.*` for app-specific data.
 - **Metafield namespace:** `discount_app` for all app metafields
 
 ## Data Model Rules

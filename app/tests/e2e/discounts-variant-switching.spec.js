@@ -432,7 +432,7 @@ async function selectVariantById(page, variantId) {
 
 function getDiscountDebugSnapshot(page) {
   return page.evaluate(() => {
-    const ns = window["display-discounts-pro"];
+    const ns = window["discounts-display-pro"];
     const productId = window.ShopifyAnalytics?.meta?.product?.id || null;
     if (!ns || typeof ns.utils?.getProducts !== "function") {
       return { productId, hasDebug: false };

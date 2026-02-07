@@ -1,6 +1,6 @@
 /**
  * Client-side logger for Discount Display Pro theme extension
- * Exposed as window["display-discounts-pro"].logger
+ * Exposed as window["discounts-display-pro"].logger
  */
 
 import _ns from './namespace.js';

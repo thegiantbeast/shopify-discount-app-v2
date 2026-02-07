@@ -39,8 +39,8 @@ export default function App() {
 
   useEffect(() => {
     if (typeof window !== "undefined" && appVersions) {
-      const ns = (window["display-discounts-pro"] =
-        window["display-discounts-pro"] || {});
+      const ns = (window["discounts-display-pro"] =
+        window["discounts-display-pro"] || {});
       ns.versions = appVersions;
     }
   }, [appVersions]);
