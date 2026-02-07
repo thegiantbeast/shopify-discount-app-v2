@@ -2,7 +2,7 @@
 
 client_id = "c14a881db543db5ee77a83c990e47dab"
 name = "discounts display pro"
-application_url = "https://example.com"
+application_url = "https://test.discountsapp.wizardformula.pt"
 embedded = true
 
 [build]
@@ -10,6 +10,22 @@ automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-10"
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/customers_data_request"
+  compliance_topics = [ "customers/data_request" ]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/customers_redact"
+  compliance_topics = [ "customers/redact" ]
+
+  [[webhooks.subscriptions]]
+  uri = "/webhooks/app/shop_redact"
+  compliance_topics = [ "shop/redact" ]
+
+  [[webhooks.subscriptions]]
+  topics = [ "products/update" ]
+  uri = "/webhooks/app/products_update"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
@@ -20,16 +36,16 @@ api_version = "2025-10"
   uri = "/webhooks/app/scopes_update"
 
   [[webhooks.subscriptions]]
-  topics = [ "app_subscriptions/update" ]
-  uri = "/webhooks/app/subscriptions_update"
-
-  [[webhooks.subscriptions]]
-  topics = [ "discounts/create" ]
-  uri = "/webhooks/app/discounts_create"
-
-  [[webhooks.subscriptions]]
   topics = [ "discounts/update" ]
   uri = "/webhooks/app/discounts_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "collections/delete" ]
+  uri = "/webhooks/app/collections_delete"
+
+  [[webhooks.subscriptions]]
+  topics = [ "products/delete" ]
+  uri = "/webhooks/app/products_delete"
 
   [[webhooks.subscriptions]]
   topics = [ "discounts/delete" ]
@@ -40,28 +56,12 @@ api_version = "2025-10"
   uri = "/webhooks/app/collections_update"
 
   [[webhooks.subscriptions]]
-  topics = [ "collections/delete" ]
-  uri = "/webhooks/app/collections_delete"
+  topics = [ "app_subscriptions/update" ]
+  uri = "/webhooks/app/subscriptions_update"
 
   [[webhooks.subscriptions]]
-  topics = [ "products/update" ]
-  uri = "/webhooks/app/products_update"
-
-  [[webhooks.subscriptions]]
-  topics = [ "products/delete" ]
-  uri = "/webhooks/app/products_delete"
-
-  [[webhooks.subscriptions]]
-  compliance_topics = [ "customers/data_request" ]
-  uri = "/webhooks/app/customers_data_request"
-
-  [[webhooks.subscriptions]]
-  compliance_topics = [ "customers/redact" ]
-  uri = "/webhooks/app/customers_redact"
-
-  [[webhooks.subscriptions]]
-  compliance_topics = [ "shop/redact" ]
-  uri = "/webhooks/app/shop_redact"
+  topics = [ "discounts/create" ]
+  uri = "/webhooks/app/discounts_create"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -71,8 +71,8 @@ use_legacy_install_flow = false
 
 [auth]
 redirect_urls = [
-  "https://example.com/auth/callback",
-  "https://example.com/auth/shopify/callback"
+  "https://test.discountsapp.wizardformula.pt/auth/callback",
+  "https://test.discountsapp.wizardformula.pt/auth/shopify/callback"
 ]
 
 [pos]

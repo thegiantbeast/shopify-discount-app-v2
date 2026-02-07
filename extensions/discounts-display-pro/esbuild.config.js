@@ -15,7 +15,7 @@ const buildOptions = {
   target: 'es2020',
   format: 'iife',
   globalName: 'DiscountDisplayPro',
-  outfile: resolve(__dirname, 'assets/discount-display-pro.js'),
+  outfile: resolve(__dirname, 'extension/assets/discount-display-pro.js'),
   logLevel: 'info',
 };
 

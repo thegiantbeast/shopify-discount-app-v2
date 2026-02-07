@@ -8,6 +8,12 @@
     {% assign app_url = shop.metafields.discount_app.app_url %}
     {% assign log_level = shop.metafields.discount_app.log_level | default: 'info' %}
     {% assign storefront_token = shop.metafields.discount_app.storefront_token %}
+    {% assign auto_badge_default = 'Sale {amount} OFF' %}
+    {% assign coupon_badge_default = 'Save {amount} with coupon' %}
+    {% assign terms_default = 'This discount may not combine with other promotions. Please confirm final price at checkout\nValid on selected products only\nWe reserve the right to modify or cancel this offer at any time' %}
+    {% assign coupon_apply_default = 'Apply {amount} discount' %}
+    {% assign coupon_applied_default = '{amount} off coupon applied' %}
+    {% assign currency_symbols_default = '{}' %}
 
     app.apiBaseUrl = {{ app_url | json }};
     app.logLevel = {{ log_level | json }};
@@ -45,22 +51,22 @@
     app.moneyWithCurrencyFormat = {{ shop.money_with_currency_format | json }};
 
     // Badge text templates from metafields
-    app.automaticBadgeText = {{ shop.metafields.discount_app.automatic_badge_text.value | default: 'Sale {amount} OFF' | json }};
-    app.couponBadgeText = {{ shop.metafields.discount_app.coupon_badge_text.value | default: 'Save {amount} with coupon' | json }};
+    app.automaticBadgeText = {{ shop.metafields.discount_app.automatic_badge_text.value | default: auto_badge_default | json }};
+    app.couponBadgeText = {{ shop.metafields.discount_app.coupon_badge_text.value | default: coupon_badge_default | json }};
     app.badgeAlignment = {{ block.settings.pc_badge_alignment | json }};
 
     // Discount settings
     app.settings = {
       autoApplyCoupons: {{ shop.metafields.discount_app.auto_apply_coupons.value | default: false | json }},
       showTermsLink: {{ block.settings.show_terms_link | json }},
-      discountTermsTemplate: {{ shop.metafields.discount_app.discount_terms_template.value | default: 'This discount may not combine with other promotions. Please confirm final price at checkout\nValid on selected products only\nWe reserve the right to modify or cancel this offer at any time' | json }},
+      discountTermsTemplate: {{ shop.metafields.discount_app.discount_terms_template.value | default: terms_default | json }},
       couponText: {{ shop.metafields.discount_app.coupon_text.value | default: 'Coupon:' | json }},
-      couponApplyLabel: {{ shop.metafields.discount_app.coupon_apply_label.value | default: 'Apply {amount} discount' | json }},
-      couponAppliedLabel: {{ shop.metafields.discount_app.coupon_applied_label.value | default: '{amount} off coupon applied' | json }},
+      couponApplyLabel: {{ shop.metafields.discount_app.coupon_apply_label.value | default: coupon_apply_default | json }},
+      couponAppliedLabel: {{ shop.metafields.discount_app.coupon_applied_label.value | default: coupon_applied_default | json }},
       appliedIconFile: {{ block.settings.pp_applied_icon_file | json }},
       appliedIconColor: '{{ block.settings.pp_applied_icon_color | default: "#199473" }}',
       appliedTextColor: '{{ block.settings.pp_applied_text_color | default: "#199473" }}',
-      badgeText: {{ shop.metafields.discount_app.automatic_badge_text.value | default: 'Sale {amount} OFF' | json }}
+      badgeText: {{ shop.metafields.discount_app.automatic_badge_text.value | default: auto_badge_default | json }}
     };
 
     // Custom selector overrides from metafields
@@ -79,7 +85,7 @@
     };
 
     // Currency symbols map (comprehensive)
-    app.currencySymbols = {{ shop.metafields.discount_app.currency_symbols.value | default: '{}' }};
+    app.currencySymbols = {{ shop.metafields.discount_app.currency_symbols.value | default: currency_symbols_default }};
   })();
 </script>
 

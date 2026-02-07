@@ -6,7 +6,7 @@
     "build": "remix vite:build",
     "build:extension": "node extensions/discounts-display-pro/esbuild.config.js",
     "watch:extension": "node extensions/discounts-display-pro/esbuild.config.js --watch",
-    "dev": "shopify app dev",
+    "dev": "npm run build:extension && npm run watch:extension & shopify app dev --store=https://wizardformula-2.myshopify.com --tunnel-url https://shopify-dev.wizardformula.pt:3000",
     "deploy": "shopify app deploy",
     "config:link": "shopify app config link",
     "config:use": "shopify app config use",
