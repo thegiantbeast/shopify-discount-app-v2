@@ -277,6 +277,10 @@ The app uses two TOML configuration files required by Shopify CLI:
 
 Both files are required. Without `shopify.web.toml`, Shopify CLI cannot detect the web process, which means `automatically_update_urls_on_dev` won't work and `--tunnel-url` won't update app URLs in the dashboard during development.
 
+### `webhooks_path` in `shopify.web.toml`
+
+The optional `webhooks_path` field has a single purpose: when the CLI detects the remote app config changed during `shopify app dev`, it sends a **test APP_UNINSTALLED webhook** to `http://localhost:{port}{webhooksPath}`. It is unrelated to the webhook subscriptions in `shopify.app.toml` (those are delivered by Shopify via the tunnel). The value points to the uninstall handler (`/webhooks/app/uninstalled`) because that's the endpoint the CLI targets. If omitted, the CLI defaults to `/api/webhooks`.
+
 ## Architecture
 
 ```
