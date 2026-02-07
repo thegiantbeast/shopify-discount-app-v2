@@ -1,0 +1,184 @@
+{% comment %}
+  Product Card / Collection Styles
+  Class prefix: .embed-discounts
+{% endcomment %}
+
+{% style %}
+  /* CSS Custom Properties for Product Cards */
+  :root {
+    --automatic-badge-bg-color: {{ block.settings.pc_automatic_badge_bg_color | default: shop.metafields.discount_app.automatic_badge_bg_color.value | default: '#E9A417' }};
+    --automatic-badge-text-color: {{ block.settings.pc_automatic_badge_text_color | default: shop.metafields.discount_app.automatic_badge_text_color.value | default: '#ffffff' }};
+    --coupon-badge-bg-color: {{ block.settings.pc_coupon_badge_bg_color | default: shop.metafields.discount_app.coupon_badge_bg_color.value | default: '#279ed9' }};
+    --coupon-badge-text-color: {{ block.settings.pc_coupon_badge_text_color | default: shop.metafields.discount_app.coupon_badge_text_color.value | default: '#ffffff' }};
+    --discounted-price-color: {{ block.settings.pc_discounted_price_color | default: shop.metafields.discount_app.discounted_price_color.value | default: '#199457' }};
+    --embed-price-font-size: {{ block.settings.pc_price_font_size | default: 22 }}px;
+    --badge-font-size: {{ block.settings.pc_badge_font_size | default: 14 }}px;
+    --badge-alignment: {{ block.settings.pc_badge_alignment | default: 'left' }};
+  }
+
+  /* Product Card Price Container */
+  .embed-discounts .discounted-price-container {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+
+  /* Regular Price (strikethrough) */
+  .embed-discounts .discounted-price__regular {
+    text-decoration: line-through;
+    opacity: 0.7;
+    font-size: var(--embed-price-font-size);
+  }
+
+  /* Sale Price */
+  .embed-discounts .discounted-price__sale {
+    font-weight: bold;
+    color: var(--discounted-price-color);
+    font-size: var(--embed-price-font-size);
+  }
+
+  /* Badge Base Styles */
+  .embed-discounts .discounted-price__badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: var(--badge-font-size);
+    font-weight: 600;
+    white-space: nowrap;
+    margin-top: 0.25rem;
+  }
+
+  /* Automatic Discount Badge */
+  .embed-discounts .discounted-price__badge.automatic,
+  .embed-discounts .automatic-wrapper .discounted-price__badge {
+    background-color: var(--automatic-badge-bg-color);
+    color: var(--automatic-badge-text-color);
+  }
+
+  /* Coupon Badge */
+  .embed-discounts .discounted-price__badge.coupon,
+  .embed-discounts .coupon-badge,
+  .embed-discounts .coupon-wrapper .discounted-price__badge {
+    background-color: var(--coupon-badge-bg-color);
+    color: var(--coupon-badge-text-color);
+  }
+
+  /* Badge Wrappers */
+  .embed-discounts .coupon-wrapper,
+  .embed-discounts .automatic-wrapper {
+    display: block;
+    width: fit-content;
+  }
+
+  /* Badge Alignment */
+  .embed-discounts[data-alignment="left"] .discounted-price-container,
+  .embed-discounts[data-alignment="left"] .coupon-wrapper,
+  .embed-discounts[data-alignment="left"] .automatic-wrapper {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .embed-discounts[data-alignment="center"] .discounted-price-container,
+  .embed-discounts[data-alignment="center"] .coupon-wrapper,
+  .embed-discounts[data-alignment="center"] .automatic-wrapper {
+    align-items: center;
+    text-align: center;
+  }
+
+  .embed-discounts[data-alignment="right"] .discounted-price-container,
+  .embed-discounts[data-alignment="right"] .coupon-wrapper,
+  .embed-discounts[data-alignment="right"] .automatic-wrapper {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  /* Selected Items Text (for product-specific discounts) */
+  .embed-discounts .discount-selected-items-text {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
+  /* Hidden State */
+  .embed-discounts .hidden {
+    display: none !important;
+  }
+
+  /* Loading State */
+  .embed-discounts.embed-discounts--loading {
+    opacity: 0.6;
+  }
+
+  /* Skeleton Loader for Cards */
+  .embed-skeleton-loader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .embed-skeleton-line {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: embed-skeleton-pulse 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    height: 1rem;
+  }
+
+  .embed-skeleton-line--price {
+    width: 100px;
+    height: var(--embed-price-font-size);
+  }
+
+  .embed-skeleton-line--badge {
+    width: 120px;
+    height: calc(var(--badge-font-size) + 0.5rem);
+  }
+
+  @keyframes embed-skeleton-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  /* Ensure badges don't break layout */
+  .embed-discounts .discounted-price__badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    :root {
+      --embed-price-font-size: {{ block.settings.pc_price_font_size | default: 22 | minus: 2 }}px;
+      --badge-font-size: {{ block.settings.pc_badge_font_size | default: 14 | minus: 1 }}px;
+    }
+
+    .embed-discounts .discounted-price__badge {
+      padding: 0.2rem 0.4rem;
+    }
+  }
+
+  /* Theme-specific overrides for better integration */
+
+  /* Dawn theme compatibility */
+  .card__information .embed-discounts {
+    margin-top: 0.5rem;
+  }
+
+  /* Ensure proper spacing in card layouts */
+  .card__content .embed-discounts,
+  .product-card .embed-discounts {
+    margin-top: 0.5rem;
+  }
+
+  /* Prevent badge overflow in tight layouts */
+  .grid__item .embed-discounts .discounted-price__badge {
+    max-width: calc(100% - 1rem);
+  }
+{% endstyle %}

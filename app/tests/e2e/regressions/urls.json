@@ -1,0 +1,211 @@
+{
+  "dawn": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTEzVDEyOjIyOjMxLjQ2MVoiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--b8351f48dbfdaebf1fbbbc19ba2074d4fcf740cb&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179782680880",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "horizon": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTEzVDEyOjIyOjMxLjcyNFoiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--f6b7271582ff50bdaaf8f0451baba02bc2905e09&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179782648112",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "sense": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTE2VDE0OjQyOjI2Ljg1N1oiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--2b99e9ee90e9165b4dec98bbfb193c48baf39176&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179782746416",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "rise": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTE2VDE0OjQyOjI2Ljg5MVoiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--4fc8abc3aa31094cc04bca542e71be8829d2908f&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179782779184",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "symmetry": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTE2VDE0OjU1OjI0LjgxNloiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--91db612ee8e3e16e090b8fcd40e36e7448749f75&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179959365936",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "vision": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTE2VDE0OjU1OjI0Ljc1M1oiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--401c4661048cb7060516529961e77a5c876b01c4&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179959398704",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "wonder": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTE2VDE0OjU1OjI0LjY2NFoiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--05f5d0876d424193407989e6f621bec6bb47bc12&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179959464240",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "spotlight": {
+    "previewUrl": "https://wizardformula-2.myshopify.com/?_ab=0&_bt=eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaEpJaUozYVhwaGNtUm1iM0p0ZFd4aExUSXViWGx6YUc5d2FXWjVMbU52YlFZNkJrVlUiLCJleHAiOiIyMDI1LTEwLTE2VDE1OjAxOjQ5Ljg1M1oiLCJwdXIiOiJwZXJtYW5lbnRfcGFzc3dvcmRfYnlwYXNzIn19--edd1b3b8e1fc7f3d21fac89c73cbf83b452313ab&_fd=0&_sc=1&key=7bca942806d214c17e04e27b2027d43d02f8162f301d5a380ccafcceb043651f&preview_theme_id=179959529776",
+    "password": "102938",
+    "pages": [
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-default.png",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-special.png",
+        "scenario": "selling-plans-select-special",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      },
+      {
+        "path": "/products/selling-plans-ski-wax",
+        "baseline": "selling-plans-ski-wax-sample.png",
+        "scenario": "selling-plans-select-sample",
+        "snapshotTarget": "form",
+        "maxDiffPixelRatio": 0.0005
+      }
+    ]
+  },
+  "_comment_savor": "TODO: Add savor preview URL with fresh _bt bypass token and preview_theme_id. Current tokens may be expired. Once added, create a proper 'savor' object with previewUrl, password, and pages array matching the pattern above."
+}

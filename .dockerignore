@@ -1,0 +1,11 @@
+node_modules
+.git
+*.md
+docs/
+app/tests/
+playwright.config.js
+playwright/
+.env
+.env.*
+!.env.example
+prisma/dev.sqlite*

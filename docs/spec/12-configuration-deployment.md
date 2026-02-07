@@ -217,131 +217,183 @@ npm run start    # Equivalent to: remix-serve ./build/server/index.js
 
 ---
 
-## Docker Deployment
+## Docker Image (what the Dockerfile does)
 
 **File:** `Dockerfile`
 
-### Two-Stage Build
+The Dockerfile performs a single-stage build with distinct phases. You don't need to run `docker build` manually — Dokploy handles this. But understanding the phases helps with debugging build failures.
 
-The Dockerfile performs a single-stage build (no multi-stage) with distinct phases:
+**Phase 1 — Base image:** `node:24-alpine` + `openssl` (required by Prisma). Sets `NODE_ENV=production`.
 
-**Phase 1: Base Image and Dependencies**
+**Phase 2 — Dependencies:** Copies `package.json` and `package-lock.json` first (for Docker layer caching), then runs `npm ci --omit=dev` to install production dependencies only.
+
+**Phase 3 — Domain replacement:** The `shopify.app.toml` file uses `example.com` as a placeholder. At build time, `sed` replaces it with the real domain based on the `APP_BUILD_ENV` build arg:
+
+| `APP_BUILD_ENV` | Domain |
+|-----------------|--------|
+| `testing`       | `test.discountsapp.wizardformula.pt` |
+| `production`    | `discountsapp.wizardformula.pt` |
+
+**Phase 4 — Build & Shopify deploy:** Runs `remix vite:build`, then installs the Shopify CLI temporarily, runs `shopify app deploy -f` (registers webhooks, scopes, and redirect URLs with Shopify), and removes the CLI.
+
+**Phase 5 — Litestream + backup tools:** Downloads Litestream v0.5.7 for continuous SQLite WAL replication, installs `sqlite3` CLI for scheduled VACUUM backups, and copies the entrypoint script.
+
+**Phase 6 — Health check + entrypoint:**
 ```dockerfile
-FROM node:24-alpine
-RUN apk add --no-cache openssl
-```
-- Uses `node:24-alpine` as the base image.
-- Installs `openssl` (required by Prisma for SQLite).
-- Sets `NODE_ENV=production`.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -qO- http://localhost:3000/api/health || exit 1
 
-**Phase 2: Install Dependencies**
-```dockerfile
-COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev && npm cache clean --force
-```
-- Copies only package files first for Docker layer caching.
-- Installs production dependencies only (`--omit=dev`).
-
-**Phase 3: Copy Source and Domain Replacement**
-```dockerfile
-COPY . .
-RUN case "$APP_BUILD_ENV" in \
-        testing) DOMAIN_REPLACEMENT="test.discountsapp.wizardformula.pt" ;; \
-        production) DOMAIN_REPLACEMENT="discountsapp.wizardformula.pt" ;; \
-        *) echo "Invalid APP_BUILD_ENV..." >&2; exit 1 ;; \
-    esac && \
-    sed -i "s|example.com|${DOMAIN_REPLACEMENT}|g" shopify.app.toml
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 ```
 
-### Domain Replacement
+The entrypoint runs: `litestream restore` (if DB missing) → `litestream replicate -exec "npm run docker-start"` → which runs `npm run setup && npm run start` (migrations + Remix server on port 3000).
 
-The `shopify.app.toml` file uses `example.com` as a placeholder for all URLs (`application_url`, `redirect_urls`). At build time, the `APP_BUILD_ENV` argument determines the replacement:
+---
 
-| `APP_BUILD_ENV` | Domain                                    |
-|-----------------|-------------------------------------------|
-| `testing`       | `test.discountsapp.wizardformula.pt`      |
-| `production`    | `discountsapp.wizardformula.pt`           |
+## Deploying to Dokploy (step by step)
 
-`sed` replaces all occurrences of `example.com` in the TOML file.
+### Step 1: Create the application
 
-**Phase 4: Build and Deploy**
-```dockerfile
-RUN npm run build
-RUN npm install -g @shopify/cli@latest && \
-    SHOPIFY_CLI_PARTNERS_TOKEN="$SHOPIFY_CLI_PARTNERS_TOKEN" \
-    SHOPIFY_CLI_NO_ANALYTICS=1 \
-    shopify app deploy -f && \
-    npm remove -g @shopify/cli
+1. Log into your Dokploy dashboard
+2. Go to **Projects** → **Create Project** (or select an existing one)
+3. Inside the project, click **Create Service** → **Application**
+4. Choose **Docker** as the build type
+5. Under **Provider**, select **Git** and connect your repository
+6. Set the **Branch** to `main` (or your deploy branch)
+
+### Step 2: Add build arguments
+
+The Docker build needs to know which environment to target.
+
+1. Go to your application → **Advanced** tab → **Build Args**
+2. Add:
+
+| Name | Value |
+|------|-------|
+| `APP_BUILD_ENV` | `production` (or `testing` for staging) |
+| `SHOPIFY_CLI_PARTNERS_TOKEN` | Your Partners CLI token |
+
+**Where to get the Partners token:** Shopify Partners dashboard → Settings → CLI tokens → Create token.
+
+### Step 3: Add runtime environment variables
+
+These are the env vars the running container needs.
+
+1. Go to your application → **Environment** tab
+2. Paste these (one per line), replacing placeholder values:
+
+```env
+SHOPIFY_API_KEY=your-api-key
+SHOPIFY_API_SECRET=your-api-secret
+SHOPIFY_APP_URL=https://discountsapp.wizardformula.pt
+DATABASE_URL=file:/app/prisma/dev.sqlite?connection_limit=1
+SHOPIFY_MANAGED_PRICING_HANDLE=discounts-display
+STOREFRONT_AUTH_ENFORCE=true
+LOG_LEVEL=info
+LITESTREAM_ACCESS_KEY_ID=your-r2-access-key
+LITESTREAM_SECRET_ACCESS_KEY=your-r2-secret-key
 ```
-- Builds the Remix application.
-- Installs the Shopify CLI globally, runs `shopify app deploy -f` (force deploy, no confirmation prompt), then removes the CLI to keep the image smaller.
-- The `SHOPIFY_CLI_PARTNERS_TOKEN` build argument authenticates the deploy.
 
-**Phase 5: Litestream + Backup Infrastructure**
-```dockerfile
-# Install Litestream for continuous SQLite replication
-ADD https://github.com/benbjohnson/litestream/releases/download/v0.5.7/litestream-v0.5.7-linux-amd64.tar.gz /tmp/litestream.tar.gz
-RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz && rm /tmp/litestream.tar.gz
+3. Click **Save**
 
-# Install sqlite3 CLI for scheduled backups (VACUUM INTO)
-RUN apk add --no-cache sqlite
+**Where to find each value:**
+- `SHOPIFY_API_KEY` / `SHOPIFY_API_SECRET`: Shopify Partners → your app → API credentials
+- `SHOPIFY_APP_URL`: Must match the domain for your `APP_BUILD_ENV` (e.g., `https://discountsapp.wizardformula.pt` for production)
+- `DATABASE_URL`: Always use this exact value — matches the path inside the container
+- `LITESTREAM_*`: Cloudflare dashboard → R2 → Manage R2 API Tokens → Create token with read/write access to your bucket
 
-COPY litestream.yml /etc/litestream.yml
-COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-```
+### Step 4: Configure Litestream backup destination
 
-**Phase 6: Runtime**
-```dockerfile
-CMD ["/usr/local/bin/docker-entrypoint.sh"]
-```
-- The entrypoint script: (1) restores database from Litestream if missing, (2) starts the app under Litestream replication
-- Pattern: `litestream restore -if-db-not-exists → litestream replicate -exec "npm run docker-start"`
-- `docker-start` runs: `npm run setup && npm run start`
-- This ensures Prisma migrations are applied before starting the server.
-- Litestream continuously streams WAL changes to S3-compatible storage (e.g., Cloudflare R2)
+Before your first deploy, edit `litestream.yml` in your repository:
 
-The container exposes port 3000.
-
-### Backup Configuration
-
-**File: `litestream.yml`** (project root)
 ```yaml
 dbs:
   - path: /app/prisma/dev.sqlite
     replicas:
       - type: s3
-        bucket: your-backup-bucket
+        bucket: your-backup-bucket          # ← your R2 bucket name
         path: discounts-app/db
-        endpoint: https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+        endpoint: https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com  # ← your R2 endpoint
         region: auto
         retention: 72h
         snapshot-interval: 1h
         sync-interval: 1s
 ```
 
-Credentials via env vars: `LITESTREAM_ACCESS_KEY_ID`, `LITESTREAM_SECRET_ACCESS_KEY`.
+**Where to find these:**
+- **Bucket name**: Cloudflare dashboard → R2 → the bucket you created
+- **Endpoint**: Cloudflare dashboard → R2 → your bucket → Settings → S3 API endpoint
 
-**Scheduled VACUUM INTO** (every 6 hours) — run via deployment platform's scheduled jobs (e.g., Dokploy), not cron inside the container:
-```bash
-sqlite3 /app/prisma/dev.sqlite "VACUUM INTO '/app/prisma/backups/backup-$(date +%Y%m%d-%H%M%S).sqlite';"
+Commit this file to your repository.
+
+### Step 5: Set up the domain
+
+1. Go to your application → **Domains** tab → **Add Domain**
+2. Set **Host** to your domain (e.g., `discountsapp.wizardformula.pt`)
+3. Set **Container Port** to `3000`
+4. Enable **HTTPS** (Dokploy auto-provisions Let's Encrypt certificates)
+5. Click **Save**
+6. In your DNS provider, create an **A record** pointing your domain to your Dokploy server's IP
+
+### Step 6: Enable zero-downtime deployments
+
+Without this, each deploy causes a brief downtime while containers swap.
+
+1. Go to your application → **Advanced** tab → **Swarm Settings** (or **Health Check**)
+2. Paste this health check configuration:
+
+```json
+{
+  "Test": ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"],
+  "Interval": 30000000000,
+  "Timeout": 10000000000,
+  "StartPeriod": 30000000000,
+  "Retries": 3
+}
 ```
 
-See `13-known-issues-improvements.md` for full backup strategy rationale and restore procedures.
+**What this does:** On each deploy, Dokploy starts the new container alongside the old one. It pings `/api/health` every 30 seconds (waiting 30 seconds initially for boot + migrations). Once the new container responds 200, the old container is stopped. If the health check fails 3 times in a row, the deploy is rolled back.
+
+### Step 7: Deploy
+
+1. Go to **Deployments** tab → click **Deploy** (or push to your branch if auto-deploy is on)
+2. Watch the build logs. A successful build shows:
+   - `npm ci` installing dependencies
+   - `remix vite:build` compiling the app
+   - `shopify app deploy` registering configuration with Shopify
+3. Once the container starts, the logs should show:
+   - Litestream restoring the DB (first deploy only) or starting replication
+   - Prisma migrations running
+   - `remix-serve` listening on port 3000
+
+### Step 8: Set up scheduled VACUUM backups
+
+Litestream handles continuous replication (~1 second RPO), but you should also have periodic compacted snapshots as a safety net.
+
+1. In Dokploy, find **Scheduled Jobs** or **Cron Jobs** for your application
+2. Create a new job:
+   - **Schedule**: `0 */6 * * *` (runs every 6 hours)
+   - **Command**: `sqlite3 /app/prisma/dev.sqlite "VACUUM INTO '/tmp/backup-$(date +%Y%m%d-%H%M%S).sqlite'"`
+
+**Never** use `cp` to back up SQLite — it produces corrupt copies during active writes. `VACUUM INTO` is safe.
+
+### Step 9: Verify everything works
+
+1. Visit `https://your-domain.com/api/health` — should return `{"status":"ok"}`
+2. Open your Shopify store → Apps → Discount Display Pro — the app should load in the admin
+3. Check Dokploy logs for errors (look for Litestream replication confirmations and any Prisma migration output)
+4. In Cloudflare R2, check your bucket — Litestream should have started writing WAL segments
 
 ---
 
 ## Deployment Environments
 
-### Testing: test.discountsapp.wizardformula.pt
+| Environment | `APP_BUILD_ENV` | Domain | Billing |
+|-------------|-----------------|--------|---------|
+| **Testing** | `testing` | `test.discountsapp.wizardformula.pt` | Test mode (`SHOPIFY_BILLING_USE_TEST=true`) |
+| **Production** | `production` | `discountsapp.wizardformula.pt` | Real charges |
 
-Built with `APP_BUILD_ENV=testing`. Used for QA and staging. Test billing mode is typically enabled (`SHOPIFY_BILLING_USE_TEST=true`).
-
-### Production: discountsapp.wizardformula.pt
-
-Built with `APP_BUILD_ENV=production`. The live production environment serving real merchants.
-
-Both environments run the same Docker image with different build arguments. The domain replacement ensures that webhook URLs, auth redirects, and the application URL all point to the correct host.
+Both environments use the same Dockerfile — only the build arg and env vars differ. You can set up two separate Dokploy applications (one per environment) in the same project.
 
 ---
 

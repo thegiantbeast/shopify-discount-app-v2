@@ -1,0 +1,13 @@
+# Litestream continuous WAL replication to Cloudflare R2
+# Credentials via env vars: LITESTREAM_ACCESS_KEY_ID, LITESTREAM_SECRET_ACCESS_KEY
+dbs:
+  - path: /app/prisma/dev.sqlite
+    replicas:
+      - type: s3
+        bucket: your-backup-bucket
+        path: discounts-app/db
+        endpoint: https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+        region: auto
+        retention: 72h
+        snapshot-interval: 1h
+        sync-interval: 1s

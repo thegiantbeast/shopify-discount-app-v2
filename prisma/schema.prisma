@@ -1,0 +1,300 @@
+// Discount Display Pro v2 — Prisma Schema
+// Rebuilt with proper foreign keys, cascading deletes, and junction tables
+// See docs/spec/03-data-model.md for field purposes and query patterns
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum InstallStatus {
+  init
+  failed
+  done
+}
+
+// ============================================================
+// Session — Managed by @shopify/shopify-app-session-storage-prisma
+// DO NOT modify this model's fields without checking the package
+// ============================================================
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+
+  @@index([shop])
+}
+
+// ============================================================
+// Shop — Central record per installed store
+// Parent for all shop-scoped data via shopId FK
+// ============================================================
+model Shop {
+  id                              String         @id @default(uuid())
+  domain                          String         @unique
+  tier                            String         @default("FREE")
+  liveDiscountLimit               Int?
+  billingTier                     String         @default("FREE")
+  billingStatus                   String?
+  installStatus                   InstallStatus?
+  pendingTier                     String?
+  pendingTierEffectiveAt          DateTime?
+  pendingTierSourceSubscriptionId String?
+  pendingTierContext               Json?
+  trialEndsAt                     DateTime?
+  trialRecordedAt                 DateTime?
+  trialSourceSubscriptionId       String?
+  billingCurrentPeriodEnd         DateTime?
+  storefrontToken                 String?
+  createdAt                       DateTime       @default(now())
+  updatedAt                       DateTime       @updatedAt
+
+  // Relations — cascading deletes handled on child side
+  discounts     Discount[]
+  collections   Collection[]
+  products      Product[]
+  liveDiscounts LiveDiscount[]
+  setupTasks    SetupTask[]
+
+  @@index([pendingTierEffectiveAt])
+}
+
+// ============================================================
+// Discount — Complete discount metadata from Shopify
+// Source of truth mirroring Shopify's data
+// ============================================================
+model Discount {
+  id                       String   @id @default(uuid())
+  gid                      String   @unique
+  shop                     String
+  shopId                   String
+  shopRef                  Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  title                    String
+  status                   String
+  startsAt                 DateTime
+  endsAt                   DateTime?
+  summary                  String?
+  discountClass            String
+  discountType             String
+  targetType               String
+  valueType                String
+  percentage               Float?
+  amount                   Float?
+  currencyCode             String?
+  appliesOnOneTimePurchase Boolean  @default(true)
+  appliesOnSubscription    Boolean  @default(false)
+  customerSelectionAll     Boolean  @default(true)
+  customerSegments         String   @default("[]")
+  minimumRequirement       Json?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  // Junction table relations (replace v1 JSON string fields)
+  targets  DiscountTarget[]
+  products DiscountProduct[]
+  variants DiscountVariant[]
+  codes    DiscountCode[]
+
+  @@index([shop])
+  @@index([shop, status])
+  @@index([shop, gid])
+  @@index([shopId])
+}
+
+// ============================================================
+// Collection — Local cache of Shopify collection data
+// productIds stays as JSON (read-only cache, not queried individually)
+// ============================================================
+model Collection {
+  id         String   @id @default(uuid())
+  gid        String   @unique
+  title      String
+  shop       String
+  shopId     String
+  shopRef    Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  productIds String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([shop])
+  @@index([shop, gid])
+  @@index([shopId])
+}
+
+// ============================================================
+// Product — Local cache of Shopify product data
+// variantIds stays as JSON (read-only cache, not queried individually)
+// ============================================================
+model Product {
+  id          String   @id @default(uuid())
+  gid         String   @unique
+  title       String
+  handle      String?
+  shop        String
+  shopId      String
+  shopRef     Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  variantIds  String
+  singlePrice Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([shop])
+  @@index([shop, gid])
+  @@index([shopId])
+}
+
+// ============================================================
+// LiveDiscount — Lightweight display-state table for storefront API
+// Only discounts potentially shown on storefront
+// ============================================================
+model LiveDiscount {
+  id               String    @id @default(uuid())
+  gid              String    @unique
+  shop             String
+  shopId           String
+  shopRef          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  summary          String?
+  discountType     String
+  status           String    @default("LIVE")
+  startsAt         DateTime
+  endsAt           DateTime?
+  exclusionReason  String?
+  exclusionDetails String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([shop])
+  @@index([shop, status])
+  @@index([shopId])
+}
+
+// ============================================================
+// SetupTask — Onboarding checklist for merchant dashboard
+// ============================================================
+model SetupTask {
+  id            String   @id @default(uuid())
+  shop          String
+  shopId        String
+  shopRef       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  buttonText    String
+  buttonUrl     String
+  buttonVariant String   @default("secondary")
+  target        String?
+  isManual      Boolean  @default(false)
+  isCompleted   Boolean  @default(false)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([shop, title])
+  @@index([shop])
+  @@index([shopId])
+}
+
+// ============================================================
+// PlanSubscriptionLog — Append-only billing audit trail
+// NEVER deleted, even on shop uninstall
+// Uses shopDomain (not shopId FK) to preserve audit trail
+// ============================================================
+model PlanSubscriptionLog {
+  id                        String    @id @default(uuid())
+  shopId                    String?
+  shopDomain                String
+  topic                     String
+  webhookId                 String?
+  status                    String?
+  subscriptionId            String?
+  planHandle                String?
+  planName                  String?
+  interval                  String?
+  priceAmount               Float?
+  priceCurrency             String?
+  discountPercentage        Float?
+  discountAmount            Float?
+  discountCurrency          String?
+  discountDurationLimit     Int?
+  discountRemainingDuration Int?
+  currentPeriodEnd          DateTime?
+  trialDays                 Int?
+  trialEnd                  DateTime?
+  trialActive               Boolean?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@index([shopDomain, createdAt])
+  @@index([subscriptionId])
+}
+
+// ============================================================
+// JUNCTION TABLES — Replace v1's JSON string fields on Discount
+// All cascade-delete from Discount (delete discount → delete junctions)
+// ============================================================
+
+// DiscountTarget — What the discount originally targets (collection/product/variant GIDs)
+// Replaces v1 Discount.targetIds JSON string
+model DiscountTarget {
+  id         String   @id @default(uuid())
+  discountId String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  targetType String
+  targetGid  String
+
+  @@index([discountId])
+  @@unique([discountId, targetType, targetGid])
+}
+
+// DiscountProduct — Resolved products (after collection expansion)
+// Replaces v1 Discount.resolvedProductIds JSON string
+model DiscountProduct {
+  id         String   @id @default(uuid())
+  discountId String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  productGid String
+
+  @@index([discountId])
+  @@index([productGid])
+  @@unique([discountId, productGid])
+}
+
+// DiscountVariant — Resolved variants (when discount targets specific variants)
+// Replaces v1 Discount.resolvedVariantIds JSON string
+model DiscountVariant {
+  id         String   @id @default(uuid())
+  discountId String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  variantGid String
+
+  @@index([discountId])
+  @@index([variantGid])
+  @@unique([discountId, variantGid])
+}
+
+// DiscountCode — Coupon codes for CODE-type discounts
+// Replaces v1 Discount.codes JSON string
+model DiscountCode {
+  id         String   @id @default(uuid())
+  discountId String
+  discount   Discount @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  code       String
+
+  @@index([discountId])
+  @@unique([discountId, code])
+}
