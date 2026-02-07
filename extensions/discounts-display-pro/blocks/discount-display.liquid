@@ -1,0 +1,141 @@
+<!-- Discount Display Pro - Storefront Block -->
+
+<!-- Inject configuration into app namespace -->
+<script>
+  (function() {
+    var app = window["display-discounts-pro"] = window["display-discounts-pro"] || {};
+
+    {% assign app_url = shop.metafields.discount_app.app_url %}
+    {% assign log_level = shop.metafields.discount_app.log_level | default: 'info' %}
+    {% assign storefront_token = shop.metafields.discount_app.storefront_token %}
+
+    app.apiBaseUrl = {{ app_url | json }};
+    app.logLevel = {{ log_level | json }};
+    app.storefrontToken = {{ storefront_token | json }};
+
+    // Environment classification
+    function classifyEnv(source) {
+      if (!source) return "DEV";
+      var value = String(source).trim().toLowerCase();
+      if (!value) return "DEV";
+      if (value.indexOf("localhost") >= 0 || value.indexOf("127.") >= 0 || value.indexOf("ngrok") >= 0) return "DEV";
+      if (value.indexOf("test") >= 0 || value.indexOf("staging") >= 0 || value.indexOf("preview") >= 0) return "TESTING";
+      if (value.indexOf("wizardformula") >= 0 || value.indexOf("discountsapp") >= 0) return "PROD";
+      return "DEV";
+    }
+    var backendUrl = {{ app_url | json }};
+    var backendEnv = classifyEnv(backendUrl);
+    app.versions = { BACKEND: backendEnv };
+    {% if request.design_mode %}
+    app.versions.BACKEND_URL = backendUrl || null;
+    app.versions.SHOP = {{ shop.domain | json }};
+    app.versions.EXTENSION = "discounts-display-pro";
+    {% endif %}
+
+    // Preview mode from block settings (theme editor only)
+    app.previewMode = {{ block.settings.pp_preview_mode | json }};
+    app.showAppliedPreview = {{ block.settings.pp_preview_show_applied | json }};
+
+    // Currency configuration
+    app.shopCurrency = {{ cart.currency.iso_code | default: shop.currency | json }};
+    app.presentmentCurrency = {{ cart.currency.iso_code | default: localization.country.currency.iso_code | default: shop.currency | json }};
+    app.currencySymbol = {{ cart.currency.symbol | default: localization.country.currency.symbol | default: '' | json }};
+    app.baseCurrency = {{ shop.currency | json }};
+    app.moneyFormat = {{ shop.money_format | json }};
+    app.moneyWithCurrencyFormat = {{ shop.money_with_currency_format | json }};
+
+    // Badge text templates from metafields
+    app.automaticBadgeText = {{ shop.metafields.discount_app.automatic_badge_text.value | default: 'Sale {amount} OFF' | json }};
+    app.couponBadgeText = {{ shop.metafields.discount_app.coupon_badge_text.value | default: 'Save {amount} with coupon' | json }};
+    app.badgeAlignment = {{ block.settings.pc_badge_alignment | json }};
+
+    // Discount settings
+    app.settings = {
+      autoApplyCoupons: {{ shop.metafields.discount_app.auto_apply_coupons.value | default: false | json }},
+      showTermsLink: {{ block.settings.show_terms_link | json }},
+      discountTermsTemplate: {{ shop.metafields.discount_app.discount_terms_template.value | default: 'This discount may not combine with other promotions. Please confirm final price at checkout\nValid on selected products only\nWe reserve the right to modify or cancel this offer at any time' | json }},
+      couponText: {{ shop.metafields.discount_app.coupon_text.value | default: 'Coupon:' | json }},
+      couponApplyLabel: {{ shop.metafields.discount_app.coupon_apply_label.value | default: 'Apply {amount} discount' | json }},
+      couponAppliedLabel: {{ shop.metafields.discount_app.coupon_applied_label.value | default: '{amount} off coupon applied' | json }},
+      appliedIconFile: {{ block.settings.pp_applied_icon_file | json }},
+      appliedIconColor: '{{ block.settings.pp_applied_icon_color | default: "#199473" }}',
+      appliedTextColor: '{{ block.settings.pp_applied_text_color | default: "#199473" }}',
+      badgeText: {{ shop.metafields.discount_app.automatic_badge_text.value | default: 'Sale {amount} OFF' | json }}
+    };
+
+    // Custom selector overrides from metafields
+    app.selectorOverrides = {
+      userCardPriceSelector: {{ shop.metafields.discount_app.user_card_price_selector.value | default: '' | json }},
+      userCardContainerSelector: {{ shop.metafields.discount_app.user_card_container_selector.value | default: '' | json }},
+      userFormPriceSelector: {{ shop.metafields.discount_app.user_form_price_selector.value | default: '' | json }},
+      userFormContainerSelector: {{ shop.metafields.discount_app.user_form_container_selector.value | default: '' | json }},
+      userVariantInputSelector: {{ shop.metafields.discount_app.user_variant_input_selector.value | default: '' | json }},
+      useAutoDetectSelectors: {{ shop.metafields.discount_app.use_auto_detect_selectors.value | default: 'null' | json }},
+      useCardPriceSelector: {{ shop.metafields.discount_app.use_card_price_selector.value | default: false | json }},
+      useCardContainerSelector: {{ shop.metafields.discount_app.use_card_container_selector.value | default: false | json }},
+      useFormPriceSelector: {{ shop.metafields.discount_app.use_form_price_selector.value | default: false | json }},
+      useFormContainerSelector: {{ shop.metafields.discount_app.use_form_container_selector.value | default: false | json }},
+      useVariantInputSelector: {{ shop.metafields.discount_app.use_variant_input_selector.value | default: false | json }}
+    };
+
+    // Currency symbols map (comprehensive)
+    app.currencySymbols = {{ shop.metafields.discount_app.currency_symbols.value | default: '{}' }};
+  })();
+</script>
+
+<!-- Load bundled JS with defer -->
+<script src="{{ 'discount-display-pro.js' | asset_url }}" defer></script>
+
+<!-- Load styles -->
+{% render 'card-styles.css' %}
+{% render 'product-page-styles.css' %}
+
+{% schema %}
+{
+  "name": "Discount Display Pro",
+  "settings": [
+    { "type": "header", "content": "Preview" },
+    { "type": "select", "id": "pp_preview_mode", "label": "Preview mode", "default": "real", "options": [
+      { "value": "real", "label": "Real discounts" },
+      { "value": "automatic", "label": "Automatic" },
+      { "value": "coupon", "label": "Coupon" }
+    ], "info": "Real discounts loads the actual discount available for the product. Automatic and Coupon are editor-only simulations." },
+
+    { "type": "header", "content": "Product Cards" },
+    { "type": "range", "id": "pc_price_font_size", "label": "Price font size", "min": 12, "max": 40, "step": 1, "unit": "px", "default": 22 },
+    { "type": "color", "id": "pc_discounted_price_color", "label": "Price color", "default": "#199457" },
+    { "type": "color", "id": "pc_automatic_badge_bg_color", "label": "Automatic badge background", "default": "#E9A417" },
+    { "type": "color", "id": "pc_automatic_badge_text_color", "label": "Automatic badge text color", "default": "#ffffff" },
+    { "type": "color", "id": "pc_coupon_badge_bg_color", "label": "Coupon badge background", "default": "#279ed9" },
+    { "type": "color", "id": "pc_coupon_badge_text_color", "label": "Coupon badge text color", "default": "#ffffff" },
+    { "type": "range", "id": "pc_badge_font_size", "label": "Badges font size", "min": 8, "max": 24, "step": 1, "unit": "px", "default": 14 },
+    { "type": "select", "id": "pc_badge_alignment", "label": "Badges alignment", "default": "left", "options": [
+      { "value": "left", "label": "Left" },
+      { "value": "center", "label": "Center" },
+      { "value": "right", "label": "Right" }
+    ] },
+
+    { "type": "header", "content": "Product Form" },
+    { "type": "range", "id": "price_font_size", "label": "Price font size", "min": 12, "max": 40, "step": 1, "unit": "px", "default": 24 },
+    { "type": "color", "id": "discounted_price_color", "label": "Price color", "default": "#199473" },
+    { "type": "color", "id": "pp_automatic_badge_bg_color", "label": "Automatic badge background", "default": "#E9A417" },
+    { "type": "color", "id": "pp_automatic_badge_text_color", "label": "Automatic badge text color", "default": "#ffffff" },
+    { "type": "color", "id": "pp_coupon_badge_bg_color", "label": "Coupon badge background", "default": "#279ed9" },
+    { "type": "color", "id": "pp_coupon_badge_text_color", "label": "Coupon badge text color", "default": "#ffffff" },
+    { "type": "range", "id": "pp_badge_font_size", "label": "Badges font size", "min": 8, "max": 24, "step": 1, "unit": "px", "default": 14 },
+    { "type": "range", "id": "pp_coupon_border_thickness", "label": "Coupon box border thickness", "min": 0, "max": 8, "step": 1, "unit": "px", "default": 1 },
+    { "type": "color", "id": "pp_coupon_border_color", "label": "Coupon box border color", "default": "#000000" },
+    { "type": "checkbox", "id": "pp_preview_show_applied", "label": "Preview: show applied state", "default": false },
+    { "type": "select", "id": "pp_applied_icon_file", "label": "Applied icon", "default": "check-mark-flower-filled.svg", "options": [
+      { "value": "check-mark-flower-filled.svg", "label": "Flower" },
+      { "value": "check-mark-square-filled.svg", "label": "Square" },
+      { "value": "check-mark-circle-filled.svg", "label": "Circle" },
+      { "value": "check-mark.svg", "label": "Check" }
+    ] },
+    { "type": "color", "id": "pp_applied_icon_color", "label": "Applied icon color", "default": "#199473" },
+    { "type": "color", "id": "pp_applied_text_color", "label": "Applied text color", "default": "#199473" },
+    { "type": "checkbox", "id": "show_terms_link", "label": "Show terms link", "default": true },
+    { "type": "range", "id": "terms_link_font_size", "label": "Terms link font size", "min": 8, "max": 36, "step": 1, "unit": "px", "default": 11 }
+  ]
+}
+{% endschema %}
