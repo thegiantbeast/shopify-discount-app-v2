@@ -57,6 +57,13 @@ Docker entrypoint pattern: `litestream restore → litestream replicate -exec "n
 
 **Never** use `cp` to back up SQLite — produces corrupt backups during active writes. Use `VACUUM INTO` or Litestream.
 
+## Shopify CLI Configuration
+
+Two TOML files configure how Shopify CLI manages the app:
+
+- **`shopify.app.toml`** — App identity and Partner dashboard configuration: client ID, name, application URL, webhook subscriptions, access scopes, and auth redirect URLs. This is what `shopify app deploy` pushes to Shopify.
+- **`shopify.web.toml`** — Web process definition: declares roles (`frontend`, `backend`), dev/build commands, and webhooks path. Shopify CLI scans for this file to discover the app's web process. **Without it, `automatically_update_urls_on_dev` has no effect** — the CLI skips URL updates because it finds no frontend/backend config.
+
 ## Directory Structure
 
 ```

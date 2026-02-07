@@ -266,6 +266,17 @@ After your first deploy:
 3. Check the Dokploy logs for any errors (especially Litestream replication and Prisma migration output)
 4. In Cloudflare R2, verify that Litestream has started writing WAL segments to your bucket
 
+## Shopify CLI Configuration
+
+The app uses two TOML configuration files required by Shopify CLI:
+
+| File | Purpose |
+|------|---------|
+| `shopify.app.toml` | App identity — client ID, name, application URL, webhook subscriptions, access scopes, auth redirect URLs. Pushed to the Shopify Partners dashboard on `shopify app deploy`. |
+| `shopify.web.toml` | Web process definition — declares roles (`frontend`, `backend`), dev/build commands (`remix vite:dev`), and webhooks path. Shopify CLI scans for this file to discover the app's web process. |
+
+Both files are required. Without `shopify.web.toml`, Shopify CLI cannot detect the web process, which means `automatically_update_urls_on_dev` won't work and `--tunnel-url` won't update app URLs in the dashboard during development.
+
 ## Architecture
 
 ```
